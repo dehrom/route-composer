@@ -33,15 +33,19 @@ protocol ExampleScreenConfiguration {
 extension ExampleScreenConfiguration {
 
     var homeScreen: DestinationStep<UITabBarController, Any?> {
-        return StepAssembly(
-                // As both factory and finder are generic, You have to provide with at least one instance
-                // the type of the view controller and the context to be used. You do not need to do so if you are using at
-                // least one custom factory of finder that have set typealias for ViewController and Context.
-                finder: HomeFinder(),
-                factory: StoryboardFactory(storyboardName: "TabBar"))
+        return ADestination(from: GeneralStep.root())
                 .using(GeneralAction.replaceRoot())
-                .from(GeneralStep.root())
+                .present(SingleStep(finder: HomeFinder(), factory: StoryboardFactory(storyboardName: "TabBar")))
                 .assemble()
+//        return StepAssembly(
+//                // As both factory and finder are generic, You have to provide with at least one instance
+//                // the type of the view controller and the context to be used. You do not need to do so if you are using at
+//                // least one custom factory of finder that have set typealias for ViewController and Context.
+//                finder: HomeFinder(),
+//                factory: StoryboardFactory(storyboardName: "TabBar"))
+//                .using(GeneralAction.replaceRoot())
+//                .from(GeneralStep.root())
+//                .assemble()
     }
 
     var circleScreen: DestinationStep<CircleViewController, Any?> {
@@ -63,15 +67,22 @@ extension ExampleScreenConfiguration {
     }
 
     var colorScreen: DestinationStep<ColorViewController, String> {
-        return StepAssembly(
-                finder: ColorViewControllerFinder(),
-                factory: ColorViewControllerFactory())
-                .add(ExampleGenericContextTask<ColorViewController, String>())
-                .using(ExampleNavigationController.pushToNavigation())
-                .from(SingleContainerStep(finder: NilFinder(), factory: ExampleNavigationFactory<String>()))
+        return ADestination<String>(from: GeneralStep.current())
                 .using(GeneralAction.presentModally())
-                .from(GeneralStep.current())
+                .present(SingleContainerStep(finder: NilFinder<ExampleNavigationController, String>(), factory: ExampleNavigationFactory<String>()))
+                .using(ExampleNavigationController.pushToNavigation())
+                .present(SingleStep(finder: ColorViewControllerFinder(), factory: ColorViewControllerFactory()))
                 .assemble()
+
+//        return StepAssembly(
+//                finder: ColorViewControllerFinder(),
+//                factory: ColorViewControllerFactory())
+//                .add(ExampleGenericContextTask<ColorViewController, String>())
+//                .using(ExampleNavigationController.pushToNavigation())
+//                .from(SingleContainerStep(finder: NilFinder(), factory: ExampleNavigationFactory<String>()))
+//                .using(GeneralAction.presentModally())
+//                .from(GeneralStep.current())
+//                .assemble()
     }
 
     var routingSupportScreen: DestinationStep<RoutingRuleSupportViewController, String> {
